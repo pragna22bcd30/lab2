@@ -1,0 +1,45 @@
+name: ML Training Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Training Script
+      run: |
+        python src/train.py | tee output.txt
+
+    - name: Job Summary
+      run: |
+        echo "## Lab 2 - ML Training Summary" >> $GITHUB_STEP_SUMMARY
+        echo "**Name:** Pragnasri" >> $GITHUB_STEP_SUMMARY
+        echo "**Roll No:** 2022BCD0030" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        grep "MSE" output.txt >> $GITHUB_STEP_SUMMARY
+        grep "R2" output.txt >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: lab2-artifacts
+        path: |
+          outputs/model/model.pkl
+          outputs/results/metrics.json
